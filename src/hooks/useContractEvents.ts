@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 export interface ContractEvent {
-  type: 'RECORD_UPLOADED' | 'ACCESS_GRANTED' | 'ACCESS_REVOKED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED';
+  type: 'RECORD_UPLOADED' | 'ACCESS_GRANTED' | 'ACCESS_REVOKED' | 'APPOINTMENT_BOOKED' | 'APPOINTMENT_COMPLETED' | 'REWARD_EARNED';
   timestamp: number;
   data: Record<string, any>;
 }
@@ -71,6 +71,17 @@ export function createAccessRevokedEvent(doctorName: string, doctorAddr: string)
     data: {
       doctorName,
       doctorAddr,
+    },
+  };
+}
+
+export function createRewardEarnedEvent(amount: number, reason: string): ContractEvent {
+  return {
+    type: 'REWARD_EARNED',
+    timestamp: Date.now(),
+    data: {
+      amount,
+      reason,
     },
   };
 }

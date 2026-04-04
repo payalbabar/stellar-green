@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useWeb3 } from "@/context/Web3Context";
 import { useRouter } from "next/navigation";
-import { useContractEvents, type ContractEvent } from "@/hooks/useContractEvents";
+import { useContractEvents, type ContractEvent, createRecordUploadedEvent, createRewardEarnedEvent } from "@/hooks/useContractEvents";
 
 // Types
 type Record = {
@@ -62,6 +62,9 @@ export default function Dashboard() {
     ? new Date(records[records.length - 1].uploaded).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
     : "—";
 
+  // Mobile menu state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // Form states
   const [uploadForm, setUploadForm] = useState({ name: "", type: "Lab Report", date: "", doctor: "", notes: "", file: null as File | null });
   const [grantForm, setGrantForm] = useState({ addr: "", name: "", spec: "" });
@@ -83,6 +86,9 @@ export default function Dashboard() {
       case 'ACCESS_REVOKED':
         setActivities(prev => [{ msg: `Access revoked from <strong>${event.data.doctorName}</strong>`, time: new Date().toLocaleTimeString(), dot: "rust" }, ...prev]);
         break;
+      case 'REWARD_EARNED':
+        setActivities(prev => [{ msg: `<span className="text-lime font-bold">REWARD:</span> Earned <strong>${event.data.amount} MRT</strong> for ${event.data.reason}`, time: new Date().toLocaleTimeString(), dot: "lime" }, ...prev]);
+        break;
       default:
         break;
     }
@@ -100,8 +106,31 @@ export default function Dashboard() {
     btn.disabled = true;
 
     try {
-      // Temporary local upload - creates a blob URL for development
-      const localUrl = URL.createObjectURL(uploadForm.file);
+      let recordHash = "";
+
+      // Try Pinata upload if JWT is available
+      const pinataJwt = process.env.NEXT_PUBLIC_PINATA_JWT;
+      if (pinataJwt && uploadForm.file) {
+        btn.textContent = "🚀 Pinning to IPFS...";
+        const formData = new FormData();
+        formData.append("file", uploadForm.file);
+        
+        const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${pinataJwt}` },
+          body: formData,
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          recordHash = data.IpfsHash;
+        } else {
+          console.error("Pinata error:", await res.text());
+          recordHash = URL.createObjectURL(uploadForm.file); // Fallback
+        }
+      } else {
+        recordHash = URL.createObjectURL(uploadForm.file);
+      }
       
       const newRecord: Record = {
         id: Date.now(),
@@ -110,12 +139,18 @@ export default function Dashboard() {
         date: uploadForm.date,
         doctor: uploadForm.doctor || "Self-uploaded",
         notes: uploadForm.notes,
-        hash: localUrl,
+        hash: recordHash,
         uploaded: new Date().toISOString()
       };
 
       setRecords([...records, newRecord]);
-      addActivity(`Record <strong>"${uploadForm.name}"</strong> uploaded (local dev mode)`, "lime");
+      
+      // Emit events (simulating chain events)
+      handleContractEvent(createRecordUploadedEvent(uploadForm.name, uploadForm.type));
+      setTimeout(() => {
+        handleContractEvent(createRewardEarnedEvent(50, "data sovereignty contribution"));
+      }, 1000);
+
       setUploadForm({ name: "", type: "Lab Report", date: "", doctor: "", notes: "", file: null });
       setActiveTab("records");
     } catch (error: any) {
@@ -165,17 +200,25 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-screen bg-cream text-ink">
       {/* TOPBAR */}
-      <nav className="sticky top-0 z-[100] bg-burgundy flex items-center justify-between px-10 h-14 border-b-3 border-lime">
-        <div className="font-bebas text-[22px] tracking-[4px] text-lime">MEDIVAULT</div>
+      <nav className="sticky top-0 z-[100] bg-burgundy flex items-center justify-between px-6 md:px-10 h-14 border-b-3 border-lime">
         <div className="flex items-center gap-4">
-          <Link href="/" className="font-mono-plex text-[11px] font-semibold tracking-[2px] uppercase text-cream px-5 flex items-center hover:text-lime transition-colors">← Home</Link>
-          <span className="font-mono-plex text-[11px] tracking-[2px] uppercase bg-rust text-white px-6 py-[10px]">{shortAddr}</span>
+           <button 
+             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+             className="md:hidden text-lime text-2xl transition-transform hover:scale-110 active:scale-95"
+           >
+             {isMobileMenuOpen ? "✕" : "☰"}
+           </button>
+           <div className="font-bebas text-[22px] tracking-[4px] text-lime">MEDIVAULT</div>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="hidden sm:flex font-mono-plex text-[11px] font-semibold tracking-[2px] uppercase text-cream px-5 items-center hover:text-lime transition-colors">← Home</Link>
+          <span className="font-mono-plex text-[11px] tracking-[2px] uppercase bg-rust text-white px-4 md:px-6 py-[8px] md:py-[10px]">{shortAddr}</span>
         </div>
       </nav>
 
-      <div className="grid md:grid-cols-[280px_1fr] flex-grow">
+      <div className="grid md:grid-cols-[280px_1fr] flex-grow relative">
         {/* SIDEBAR */}
-        <aside className="bg-ink flex flex-col border-r-3 border-lime h-[calc(100vh-56px)] sticky top-14 sticky-0 custom-scrollbar overflow-y-auto">
+        <aside className={`bg-ink flex flex-col border-r-3 border-lime h-[calc(100vh-56px)] fixed md:sticky top-14 left-0 z-50 w-[280px] md:w-auto transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} custom-scrollbar overflow-y-auto`}>
           <div className="p-8 pb-0">
             <div className="font-bebas text-[32px] tracking-[4px] text-lime">DASHBOARD</div>
           </div>
@@ -188,11 +231,11 @@ export default function Dashboard() {
           </div>
           <nav className="mt-10 flex-grow">
             <div className="font-mono-plex text-[9px] tracking-[4px] uppercase text-white/20 px-8 mb-3">Navigation</div>
-            <NavItem label="Overview" icon="▦" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
-            <NavItem label="My Records" icon="📂" active={activeTab === "records"} onClick={() => setActiveTab("records")} />
-            <NavItem label="Upload" icon="↑" active={activeTab === "upload"} onClick={() => setActiveTab("upload")} />
-            <NavItem label="Doctors" icon="👨⚕" active={activeTab === "doctors"} onClick={() => setActiveTab("doctors")} />
-            <NavItem label="Access Log" icon="🔑" active={activeTab === "access"} onClick={() => setActiveTab("access")} />
+            <NavItem label="Overview" icon="▦" active={activeTab === "overview"} onClick={() => { setActiveTab("overview"); setIsMobileMenuOpen(false); }} />
+            <NavItem label="My Records" icon="📂" active={activeTab === "records"} onClick={() => { setActiveTab("records"); setIsMobileMenuOpen(false); }} />
+            <NavItem label="Upload" icon="↑" active={activeTab === "upload"} onClick={() => { setActiveTab("upload"); setIsMobileMenuOpen(false); }} />
+            <NavItem label="Doctors" icon="👨⚕" active={activeTab === "doctors"} onClick={() => { setActiveTab("doctors"); setIsMobileMenuOpen(false); }} />
+            <NavItem label="Access Log" icon="🔑" active={activeTab === "access"} onClick={() => { setActiveTab("access"); setIsMobileMenuOpen(false); }} />
           </nav>
           <div className="p-6 border-t border-white/10 mt-auto">
             <button 
@@ -204,11 +247,19 @@ export default function Dashboard() {
           </div>
         </aside>
 
+        {/* MOBILE OVERLAY */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-ink/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-300"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
         {/* MAIN */}
         <main className="dash-main overflow-y-auto h-[calc(100vh-56px)] custom-scrollbar">
-          <div className="bg-cream-dark border-b-2 border-card-border px-12 py-5 flex items-center justify-between">
-            <div className="font-bebas text-[36px] tracking-[3px] text-ink">{activeTab.toUpperCase()}</div>
-            <div className="font-mono-plex text-[11px] text-ink-soft tracking-widest">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+          <div className="bg-cream-dark border-b-2 border-card-border px-6 md:px-12 py-5 flex items-center justify-between">
+            <div className="font-bebas text-[30px] md:text-[36px] tracking-[3px] text-ink">{activeTab.toUpperCase()}</div>
+            <div className="hidden sm:block font-mono-plex text-[11px] text-ink-soft tracking-widest">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
           </div>
 
           {/* OVERVIEW */}
