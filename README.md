@@ -41,7 +41,11 @@ In mobile-friendly
 
 
 ## ✅ CI/CD Pipeline Status
-[![CI Pipeline](https://github.com/your-username/Green_Belt/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/Green_Belt/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/payalbabar/stellar-green/actions/workflows/ci.yml/badge.svg)](https://github.com/payalbabar/stellar-green/actions/workflows/ci.yml)
+
+## 📱 Mobile Responsive View
+*The application is built with a mobile-first approach, ensuring a seamless experience across all devices.*
+![Mobile Responsive Screenshot](./public/mobile-screenshot.png)
 
 **Pipeline runs:**
 - Node dependency installation
