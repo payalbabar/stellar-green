@@ -2,20 +2,22 @@
 
 MediChain is a fully decentralized Electronic Health Records (EHR) and Telemedicine platform built on Stellar/Soroban blockchain to ensure data sovereignty for patients while providing doctors with intuitive access management.
 
-## 🚀 Live Demo & Video
+## 🚀 Live Demo
 - **Live Demo:** [https://medivault-soroban.vercel.app](https://medivault-soroban.vercel.app) *(Example link for submission)*
-- **Demo Video:** Check out the 1-minute video walk-through of the UI and wallet interaction here:
-  ![Demo Video](./public/demo_video.webp)
 
-## 📸 Screenshots
-### Platform Dashboard
-![Dashboard Screenshot](./public/demo_screenshot.png)
+## 📸 Platform Screenshots
+### Dashboard & Upload
+![Dashboard Screenshot](./public/screenshots/dashboard.png)
 
-### Mobile Responsive View
-The application is fully responsive and works seamlessly on all devices:
-![Mobile View](./public/demo_mobile.png)
+### Medical Records Overview
+![Records Screenshot](./public/screenshots/records.png)
 
-*Our mobile-first approach ensures patients have their medical sovereignty in their pocket.*
+### Record Detail View
+![Record Detail](./public/screenshots/detail_report.png)
+
+*The application is fully responsive and supports secure medical data management.*
+
+
 
 ## ✅ CI/CD Pipeline Status
 [![CI Pipeline](https://github.com/your-username/Green_Belt/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/Green_Belt/actions/workflows/ci.yml)
