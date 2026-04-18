@@ -21,7 +21,7 @@ MediChain is a fully decentralized Electronic Health Records (EHR) and Telemedic
 <img width="1920" height="1080" alt="Screenshot 2026-04-04 224156" src="https://github.com/user-attachments/assets/74e40a0e-3251-4f97-9162-2a3b0eb9c432" />
 <img width="1920" height="1080" alt="Screenshot 2026-04-04 223248" src="https://github.com/user-attachments/assets/932bc9a7-d659-4b73-a32b-09ff8fb3d8c0" />
 
-<img width="1920" height="1080" alt="Screenshot 2026-04-04 222822" src="https://github.com/user-attachments/assets/c150820b-a160-41d5-a519-20f469baed81" />
+
 <img width="1920" height="1080" alt="Screenshot 2026-04-04 222809" src="https://github.com/user-attachments/assets/d3b4261d-ad66-4b6c-8bec-61988c5cac5b" />
 <img width="1920" height="1080" alt="Screenshot 2026-04-04 203127" src="https://github.com/user-attachments/assets/09b2f699-c5a6-41ea-b537-c9b55637b41e" />
 <img width="1920" height="1080" alt="Screenshot 2026-04-04 203029" src="https://github.com/user-attachments/assets/3de4277b-fe2d-494a-8290-d63bd56589a1" />
