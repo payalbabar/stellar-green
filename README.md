@@ -3,7 +3,7 @@
 MediChain is a fully decentralized Electronic Health Records (EHR) and Telemedicine platform built on Stellar/Soroban blockchain to ensure data sovereignty for patients while providing doctors with intuitive access management.
 
 ## 🌐 Live Demo
-- **Live Demo URL:** [https://stellar-green.netlify.app](https://stellar-green.netlify.app)
+- **Live Demo URL:** [https://stellar-green-ten.vercel.app/](https://stellar-green-ten.vercel.app/)
 
 
 
